@@ -23,7 +23,7 @@ import os
 import sys
 import time
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple
 
 import requests
@@ -287,7 +287,8 @@ def transform_records(
 
         # 8) Date normalization
         # input example "2024-05-11T12:34:56.789Z" -> "YYYY-MM-DDTHH:MM:SSZ"
-        action_date = datetime.strptime(r["actionDate"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%Y-%m-%dT%H:%M:%SZ")
+        action_date_utc = datetime.strptime(r["actionDate"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+        action_date = action_date_utc.astimezone().strftime("%Y-%m-%dT%H:%M:%SZ")
 
         payload = {
             "date": action_date,
