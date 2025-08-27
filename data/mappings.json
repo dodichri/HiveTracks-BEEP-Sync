@@ -1,0 +1,61 @@
+{
+  "field_map": {
+    "744": "inspectionCoveredFrames",
+    "615": "inspectionTemperature",
+    "494": "inspectionFramesWithHoney",
+    "832": "feedBeesAmount"
+  },
+  "enums": {
+    "inspectionPopulation": {
+      "Strong": { "1349": true },
+      "Weak": { "1349": false }
+    },
+    "inspectionWeather": {
+      "Drizzle": { "621": "626" },
+      "Fog":     { "621": "626" },
+      "Cloudy":  { "621": "626" },
+      "Clear":   { "621": "624" },
+      "Partly Cloudy": { "621": "625" }
+    },
+    "inspectionForagingSourceAvailability": {
+      "None":   { "892": "1" },
+      "Low":    { "892": "2" },
+      "Medium": { "892": "4" },
+      "High":   { "892": "5" }
+    },
+    "inspectionFoodStores": {
+      "Poor":      { "794": "1" },
+      "Low":       { "794": "1" },
+      "Good":      { "794": "2" },
+      "Very Good": { "794": "3" }
+    },
+    "inspectionBroodPattern": {
+      "No brood":       { "279": "1" },
+      "Very spotty":    { "279": "2" },
+      "Spotty":         { "279": "3" },
+      "Mostly solid":   { "279": "4" },
+      "Solid":          { "279": "5" }
+    },
+    "inspectionBeeBehavior": {
+      "Calm":       { "214": "3" },
+      "Nervous":    { "214": "2" },
+      "Aggressive": { "214": "1" }
+    }
+  },
+  "stages_flags": {
+    "field": "inspectionBroodStages",
+    "flags": {
+      "Queen":          "399",
+      "Eggs":           "270",
+      "Uncapped brood": "276",
+      "Capped brood":   "273"
+    }
+  },
+  "feeding_rules": [
+    { "if_type": "Pollen patty",   "set": { "888": "855" } },
+    { "if_type": "Mixed sugar",    "set": { "888": "780" } },
+    { "if_other_contains_any": ["Fondant", "HiveAlive", "Winter Bee Kind"], "set": { "888": "855" } },
+    { "if_other_contains": "1:1 mix with additives", "set": { "888": "780" } }
+  ],
+  "checklist_fallback": "TBD"
+}
