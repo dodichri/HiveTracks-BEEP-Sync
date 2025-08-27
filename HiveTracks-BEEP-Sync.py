@@ -156,17 +156,58 @@ def get_page(url: str, token: str, page: int, page_size: int = 10) -> Any:
     response.raise_for_status()
     return response.json()["result"]["data"]["json"]["results"]
 
-def get_hivetracks_records(token: str, page_size: int = 10) -> List[Dict[str, Any]]:
+# ---------- Progress-enabled fetch ----------
+def get_hivetracks_records(token: str, page_size: int = 10, show_progress: bool = True) -> List[Dict[str, Any]]:
+    """
+    Fetch HiveTracks records page-by-page and show a tqdm progress bar.
+
+    The API endpoint doesn't expose a total count here, so we treat the total as unknown.
+    The progress bar will grow as records are fetched (by record count).
+    """
     records: List[Dict[str, Any]] = []
     page = 0
+
+    pbar = None
+    if show_progress:
+        pbar = tqdm(
+            total=0,                 # unknown total → tqdm grows as we update
+            desc="Fetching HiveTracks records",
+            unit="rec",
+            dynamic_ncols=True,
+            leave=True,
+            disable=not sys.stdout.isatty()
+        )
+
     while True:
         log(f"Fetching HiveTracks page {page}")
-        page_data = get_page("https://pro.hivetracks.com/api/trpc/admin.record.paginatedList", token, page, page_size)
+        page_data = get_page(
+            "https://pro.hivetracks.com/api/trpc/admin.record.paginatedList",
+            token,
+            page,
+            page_size
+        )
+
         if not page_data:
             break
+
         records.extend(page_data)
+
+        # Update progress bar by number of records fetched this page
+        if pbar is not None:
+            pbar.update(len(page_data))
+            pbar.set_postfix(pages=page + 1, fetched=len(records))
+
+        # Stop when we get a short page (typical last page condition)
+        if len(page_data) < page_size:
+            break
+
         page += 1
+
+    if pbar is not None:
+        pbar.close()
+
     return records
+
 
 def get_hivetracks_hives(token: str) -> Any:
     return get_page("https://pro.hivetracks.com/api/trpc/admin.hive.idList", token, 0)
@@ -313,7 +354,7 @@ def main():
         else:
             log("Importing data from APIs")
             ht_token = get_hivetracks_token(HIVETRACKS_EMAIL, HIVETRACKS_PASSWORD)
-            hivetracks_records = get_hivetracks_records(ht_token)
+            hivetracks_records = get_hivetracks_records(ht_token, page_size=10, show_progress=True)
 
             beep_token = get_beep_token(BEEP_EMAIL, BEEP_PASSWORD)
             beep_checklists = get_beep_data("https://api.beep.nl/api/inspections/lists", beep_token)
